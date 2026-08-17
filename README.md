@@ -7,6 +7,8 @@
 
 **markov-namegen-js** is a zero-dependency, lightweight JavaScript library for procedural name generation using N-th order Markov chains. It is ideal for game development, worldbuilding, fantasy/sci-fi name generators, and procedural content generation.
 
+[Demo](https://denizkose.github.io/markov-chain) 📺
+
 ---
 
 ## Features
