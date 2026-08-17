@@ -13,12 +13,12 @@
   },
   "files": [
     "src",
-    "demo",
     "README.md",
     "LICENSE"
   ],
   "scripts": {
     "test": "node test/test.js",
+    "update-npm": "npm version patch && git push --follow-tags && npm publish",
     "dev": "npx serve ."
   },
   "repository": {
