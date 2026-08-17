@@ -1,0 +1,45 @@
+{
+  "name": "markov-namegen-js",
+  "version": "1.0.0",
+  "description": "Procedural Markov chain name and word generator library in JavaScript with Katz backoff, Dirichlet priors, and Damerau-Levenshtein similarity sorting.",
+  "main": "src/index.js",
+  "module": "src/index.js",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./src/index.js",
+      "default": "./src/index.js"
+    }
+  },
+  "files": [
+    "src",
+    "demo",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node test/test.js",
+    "dev": "npx serve ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/denizkose/markov-chain.git"
+  },
+  "keywords": [
+    "markov",
+    "markov-chain",
+    "name-generator",
+    "word-generator",
+    "procedural-generation",
+    "damerau-levenshtein",
+    "katz-backoff",
+    "game-dev",
+    "procedural-content"
+  ],
+  "author": "Deniz Köse",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/denizkose/markov-chain/issues"
+  },
+  "homepage": "https://denizkose.github.io/markov-chain/"
+}

@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markov Namegen JS - Procedural Name & Word Generator</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['FixelVariable', 'sans-serif'],
+            mono: ['Noto Sans Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Mono:wght@100..900&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.macpaw.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.macpaw.com/css?family=FixelVariable">
+  <!-- Load markov-namegen library UMD build -->
+  <script src="markov-namegen.js"></script>
+</head>
+
+<body
+  class="relative bg-slate-950 selection:bg-indigo-500 min-h-screen overflow-x-hidden font-sans text-slate-100 selection:text-white antialiased">
+
+  <!-- Ambient background glow effects -->
+  <div class="top-0 left-1/4 fixed bg-indigo-600/10 blur-3xl rounded-full w-96 h-96 pointer-events-none"></div>
+  <div class="right-1/4 bottom-0 fixed bg-pink-600/10 blur-3xl rounded-full w-96 h-96 pointer-events-none"></div>
+
+  <!-- Header -->
+  <header class="top-0 z-50 sticky bg-slate-950/80 backdrop-blur-xl border-slate-800/80 border-b">
+    <div class="flex justify-between items-center mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl h-16">
+      <div class="flex items-center gap-3">
+        <div
+          class="flex justify-center items-center bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 shadow-indigo-500/25 shadow-lg rounded-xl w-10 h-10 font-bold text-white text-lg">
+          M
+        </div>
+        <div>
+          <h1
+            class="bg-clip-text bg-gradient-to-r from-white via-slate-200 to-slate-400 font-bold text-transparent text-lg leading-tight">
+            Markov Namegen JS
+          </h1>
+          <p class="text-slate-400 text-xs">Procedural Name & Word Generator</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <span
+          class="inline-flex items-center bg-indigo-500/10 px-2.5 py-1 border border-indigo-500/20 rounded-full font-medium text-indigo-400 text-xs">
+          v1.0.0
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="z-10 relative gap-8 grid grid-cols-1 lg:grid-cols-12 mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-7xl">
+
+    <!-- Left Controls Panel -->
+    <div class="space-y-6 lg:col-span-5">
+      <div class="space-y-6 bg-slate-900/60 shadow-xl backdrop-blur-md p-6 border border-slate-800/80 rounded-2xl">
+
+        <div class="flex items-center gap-2 font-semibold text-indigo-400 text-sm uppercase tracking-wide">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+          </svg>
+          Configuration & Training Data
+        </div>
+
+        <!-- Preset Selector -->
+        <div class="space-y-1.5">
+          <label for="presetSelect" class="block font-medium text-slate-300 text-xs">Dataset Preset</label>
+          <select id="presetSelect"
+            class="bg-slate-950/80 px-3.5 py-2.5 border border-slate-800 focus:border-indigo-500 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500 w-full text-slate-200 text-sm transition">
+            <option value="elven">Elven Names (Lord of the Rings)</option>
+            <option value="dwarven">Dwarven Names</option>
+            <option value="fantasyPlaces">Fantasy Locations & Kingdoms</option>
+            <option value="scifiPlanets">Sci-Fi Planets & Systems</option>
+            <option value="romanNames">Ancient Roman Names</option>
+            <option value="japaneseNames">Japanese Given Names</option>
+            <option value="oldEnglish">Old English Names</option>
+            <option value="custom">Custom Corpus...</option>
+          </select>
+        </div>
+
+        <!-- Corpus Input -->
+        <div class="space-y-1.5">
+          <label for="corpusText" class="block font-medium text-slate-300 text-xs">Corpus Words (comma or newline
+            separated)</label>
+          <textarea id="corpusText" rows="4" spellcheck="false"
+            class="bg-slate-950/80 p-3 border border-slate-800 focus:border-indigo-500 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500 w-full font-mono text-slate-300 text-xs transition resize-y"></textarea>
+        </div>
+
+        <!-- Model Controls -->
+        <div class="space-y-4 pt-2 border-slate-800/80 border-t">
+          <div class="space-y-1.5">
+            <div class="flex justify-between items-center text-xs">
+              <span class="font-medium text-slate-300">Markov Order (Memory Depth)</span>
+              <span id="orderVal" class="font-mono font-semibold text-indigo-400">3</span>
+            </div>
+            <input type="range" id="orderRange" min="1" max="5" value="3"
+              class="bg-slate-800 rounded-lg w-full h-1.5 accent-indigo-500 appearance-none cursor-pointer">
+          </div>
+
+          <div class="space-y-1.5">
+            <div class="flex justify-between items-center text-xs">
+              <span class="font-medium text-slate-300">Dirichlet Prior (Smoothing)</span>
+              <span id="priorVal" class="font-mono font-semibold text-indigo-400">0.001</span>
+            </div>
+            <input type="range" id="priorRange" min="0" max="0.05" step="0.001" value="0.001"
+              class="bg-slate-800 rounded-lg w-full h-1.5 accent-indigo-500 appearance-none cursor-pointer">
+          </div>
+
+          <label class="flex items-center gap-2.5 text-slate-300 text-xs cursor-pointer select-none">
+            <input type="checkbox" id="backoffCheck" checked
+              class="bg-slate-950 border-slate-800 rounded focus:ring-indigo-500 w-4 h-4 text-indigo-600 accent-indigo-500">
+            <span>Enable Katz Backoff (fall back to lower orders)</span>
+          </label>
+        </div>
+
+        <!-- Filters Section -->
+        <div class="space-y-4 pt-4 border-slate-800/80 border-t">
+          <div class="flex items-center gap-2 font-semibold text-indigo-400 text-sm uppercase tracking-wide">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z">
+              </path>
+            </svg>
+            Filters & Constraints
+          </div>
+
+          <div class="gap-3 grid grid-cols-2">
+            <div>
+              <label class="block mb-1 font-medium text-slate-400 text-xs">Min Length</label>
+              <input type="number" id="minLengthInput" value="3" min="1" max="30"
+                class="bg-slate-950/80 px-3 py-2 border border-slate-800 focus:border-indigo-500 rounded-xl focus:outline-none w-full text-slate-200 text-sm">
+            </div>
+            <div>
+              <label class="block mb-1 font-medium text-slate-400 text-xs">Max Length</label>
+              <input type="number" id="maxLengthInput" value="12" min="1" max="50"
+                class="bg-slate-950/80 px-3 py-2 border border-slate-800 focus:border-indigo-500 rounded-xl focus:outline-none w-full text-slate-200 text-sm">
+            </div>
+          </div>
+
+          <div class="gap-3 grid grid-cols-2">
+            <div>
+              <label class="block mb-1 font-medium text-slate-400 text-xs">Starts With</label>
+              <input type="text" id="startsWithInput" placeholder="e.g. El"
+                class="bg-slate-950/80 px-3 py-2 border border-slate-800 focus:border-indigo-500 rounded-xl focus:outline-none w-full text-slate-200 text-sm">
+            </div>
+            <div>
+              <label class="block mb-1 font-medium text-slate-400 text-xs">Ends With</label>
+              <input type="text" id="endsWithInput" placeholder="e.g. on"
+                class="bg-slate-950/80 px-3 py-2 border border-slate-800 focus:border-indigo-500 rounded-xl focus:outline-none w-full text-slate-200 text-sm">
+            </div>
+          </div>
+
+          <div class="gap-3 grid grid-cols-2">
+            <div>
+              <label class="block mb-1 font-medium text-slate-400 text-xs">Includes</label>
+              <input type="text" id="includesInput" placeholder="e.g. ar"
+                class="bg-slate-950/80 px-3 py-2 border border-slate-800 focus:border-indigo-500 rounded-xl focus:outline-none w-full text-slate-200 text-sm">
+            </div>
+            <div>
+              <label class="block mb-1 font-medium text-slate-400 text-xs">Excludes</label>
+              <input type="text" id="excludesInput" placeholder="e.g. z"
+                class="bg-slate-950/80 px-3 py-2 border border-slate-800 focus:border-indigo-500 rounded-xl focus:outline-none w-full text-slate-200 text-sm">
+            </div>
+          </div>
+
+          <div>
+            <label class="block mb-1 font-medium text-slate-400 text-xs">Count to Generate</label>
+            <input type="number" id="countInput" value="24" min="1" max="200"
+              class="bg-slate-950/80 px-3 py-2 border border-slate-800 focus:border-indigo-500 rounded-xl focus:outline-none w-full text-slate-200 text-sm">
+          </div>
+        </div>
+
+        <button id="generateBtn"
+          class="flex justify-center items-center gap-2 bg-gradient-to-r from-indigo-500 hover:from-indigo-600 via-purple-500 hover:via-purple-600 to-pink-500 hover:to-pink-600 shadow-indigo-500/25 shadow-lg px-4 py-3 rounded-xl w-full font-semibold text-white active:scale-[0.99] transition duration-200">
+          <span>✨ Generate Procedural Names</span>
+        </button>
+
+      </div>
+    </div>
+
+    <!-- Right Results Panel -->
+    <div class="flex flex-col lg:col-span-7">
+      <div
+        class="flex flex-col flex-1 justify-between bg-slate-900/60 shadow-xl backdrop-blur-md p-6 border border-slate-800/80 rounded-2xl">
+
+        <div class="space-y-6">
+          <!-- Toolbar -->
+          <div class="flex flex-wrap justify-between items-center gap-4 pb-4 border-slate-800/80 border-b">
+            <div class="flex items-center gap-4 font-mono text-slate-400 text-xs">
+              <div>Generated: <span id="statCount" class="font-semibold text-cyan-400">0</span></div>
+              <div>Time: <span id="statTime" class="font-semibold text-cyan-400">0 ms</span></div>
+            </div>
+            <div class="flex items-center gap-2">
+              <button id="copyBtn"
+                class="flex items-center gap-1.5 bg-slate-800/80 hover:bg-slate-700 px-3 py-1.5 border border-slate-700 rounded-lg font-medium text-slate-200 text-xs transition">
+                <span>📋 Copy All</span>
+              </button>
+              <button id="exportBtn"
+                class="flex items-center gap-1.5 bg-slate-800/80 hover:bg-slate-700 px-3 py-1.5 border border-slate-700 rounded-lg font-medium text-slate-200 text-xs transition">
+                <span>💾 Export JSON</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Results Grid -->
+          <div id="resultsGrid"
+            class="gap-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 pr-1 max-h-[560px] overflow-y-auto">
+            <div class="col-span-full py-16 text-slate-500 text-sm text-center">
+              Click "Generate Procedural Names" to produce names.
+            </div>
+          </div>
+        </div>
+
+        <!-- Similarity Sorting Footer -->
+        <div class="flex items-center gap-3 mt-6 pt-4 border-slate-800/80 border-t">
+          <span class="text-slate-400 text-xs whitespace-nowrap">Sort by Similarity:</span>
+          <input type="text" id="similarityInput" placeholder="Enter target name..."
+            class="flex-1 bg-slate-950/80 px-3 py-2 border border-slate-800 focus:border-indigo-500 rounded-xl focus:outline-none text-slate-200 text-xs">
+          <button id="sortBtn"
+            class="bg-slate-800 hover:bg-slate-700 px-4 py-2 border border-slate-700 rounded-xl font-semibold text-slate-200 text-xs transition">
+            Sort
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    const { MarkovGenerator, damerauLevenshteinDistance, sortBySimilarity, PRESETS } = window.MarkovNamegen;
+
+    // DOM Elements
+    const presetSelect = document.getElementById('presetSelect');
+    const corpusText = document.getElementById('corpusText');
+    const orderRange = document.getElementById('orderRange');
+    const orderVal = document.getElementById('orderVal');
+    const priorRange = document.getElementById('priorRange');
+    const priorVal = document.getElementById('priorVal');
+    const backoffCheck = document.getElementById('backoffCheck');
+    const minLengthInput = document.getElementById('minLengthInput');
+    const maxLengthInput = document.getElementById('maxLengthInput');
+    const startsWithInput = document.getElementById('startsWithInput');
+    const endsWithInput = document.getElementById('endsWithInput');
+    const includesInput = document.getElementById('includesInput');
+    const excludesInput = document.getElementById('excludesInput');
+    const countInput = document.getElementById('countInput');
+    const generateBtn = document.getElementById('generateBtn');
+    const resultsGrid = document.getElementById('resultsGrid');
+    const statCount = document.getElementById('statCount');
+    const statTime = document.getElementById('statTime');
+    const copyBtn = document.getElementById('copyBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    const similarityInput = document.getElementById('similarityInput');
+    const sortBtn = document.getElementById('sortBtn');
+
+    let currentNames = [];
+
+    // Initialize preset
+    function loadPreset(key) {
+      if (PRESETS[key]) {
+        corpusText.value = PRESETS[key].join(', ');
+      }
+    }
+
+    presetSelect.addEventListener('change', (e) => {
+      loadPreset(e.target.value);
+    });
+
+    orderRange.addEventListener('input', (e) => {
+      orderVal.textContent = e.target.value;
+    });
+
+    priorRange.addEventListener('input', (e) => {
+      priorVal.textContent = parseFloat(e.target.value).toFixed(3);
+    });
+
+    loadPreset('elven');
+
+    // Generate names logic
+    function generate() {
+      const text = corpusText.value;
+      const corpus = text.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
+
+      if (corpus.length === 0) {
+        alert('Please enter at least a few words in the corpus.');
+        return;
+      }
+
+      const order = parseInt(orderRange.value, 10);
+      const prior = parseFloat(priorRange.value);
+      const useBackoff = backoffCheck.checked;
+
+      const generator = new MarkovGenerator(corpus, { order, prior, useBackoff });
+
+      const constraints = {
+        minLength: parseInt(minLengthInput.value, 10),
+        maxLength: parseInt(maxLengthInput.value, 10),
+        startsWith: startsWithInput.value.trim(),
+        endsWith: endsWithInput.value.trim(),
+        includes: includesInput.value.trim(),
+        excludes: excludesInput.value.trim(),
+        maxAttempts: 150
+      };
+
+      const count = parseInt(countInput.value, 10);
+
+      const startTime = performance.now();
+      currentNames = generator.generateNames(count, constraints);
+      const duration = (performance.now() - startTime).toFixed(1);
+
+      renderResults(currentNames);
+
+      statCount.textContent = currentNames.length;
+      statTime.textContent = `${duration} ms`;
+    }
+
+    function renderResults(namesList) {
+      resultsGrid.innerHTML = '';
+      if (namesList.length === 0) {
+        resultsGrid.innerHTML = `<div class="col-span-full py-16 text-slate-500 text-sm text-center">No names could be generated matching the current constraints. Try adjusting filters or order.</div>`;
+        return;
+      }
+
+      namesList.forEach(name => {
+        const item = typeof name === 'string' ? { name, distance: null } : name;
+        const card = document.createElement('div');
+        card.className = 'bg-slate-950/60 border border-slate-800/80 hover:border-indigo-500/50 hover:bg-indigo-500/5 rounded-xl p-3 transition duration-200 flex flex-col justify-between group';
+        card.innerHTML = `
+          <div class="font-semibold text-slate-100 group-hover:text-indigo-300 text-sm tracking-wide transition">${item.name}</div>
+          <div class="flex justify-between items-center mt-2 font-mono text-[10px] text-slate-500">
+            <span>len: ${item.name.length}</span>
+            ${item.distance !== null ? `<span class="text-cyan-400">dist: ${item.distance}</span>` : ''}
+          </div>
+        `;
+        resultsGrid.appendChild(card);
+      });
+    }
+
+    generateBtn.addEventListener('click', generate);
+
+    // Sorting by similarity
+    sortBtn.addEventListener('click', () => {
+      const target = similarityInput.value.trim();
+      if (!target || currentNames.length === 0) return;
+
+      const rawList = currentNames.map(n => typeof n === 'string' ? n : n.name);
+      const sorted = sortBySimilarity(target, rawList);
+      renderResults(sorted);
+    });
+
+    // Copy to clipboard
+    copyBtn.addEventListener('click', () => {
+      if (currentNames.length === 0) return;
+      const listStr = currentNames.map(n => typeof n === 'string' ? n : n.name).join('\n');
+      navigator.clipboard.writeText(listStr);
+      copyBtn.textContent = '✓ Copied!';
+      setTimeout(() => copyBtn.textContent = '📋 Copy All', 2000);
+    });
+
+    // Export JSON
+    exportBtn.addEventListener('click', () => {
+      if (currentNames.length === 0) return;
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(currentNames, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", "markov_names.json");
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    });
+
+    // Initial generation
+    generate();
+  </script>
+</body>
+
+</html>

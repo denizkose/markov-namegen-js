@@ -1,0 +1,12 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Environment & Logs
+*.log
+.DS_Store
+scratch/
+
+# IDE & Tooling
+.vscode/
+.idea/
