@@ -4,8 +4,9 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Node.js CI](https://img.shields.io/badge/Node.js-18%2B-green.svg)](https://nodejs.org)
+[![TypeScript: Included](https://img.shields.io/badge/TypeScript-Included-blue.svg)](https://www.typescriptlang.org)
 
-**markov-namegen-js** is a zero-dependency, lightweight JavaScript library for procedural name generation using N-th order Markov chains. It is ideal for game development, worldbuilding, fantasy/sci-fi name generators, and procedural content generation.
+**markov-namegen-js** is a zero-dependency, lightweight JavaScript/TypeScript library for procedural name generation using N-th order Markov chains. It is ideal for game development, worldbuilding, fantasy/sci-fi name generators, and procedural content generation.
 
 [Demo](https://denizkose.github.io/markov-chain) 📺
 
@@ -13,6 +14,7 @@
 
 ## Features
 
+- 🔷 **TypeScript First-Class Support**: Fully typed declarations (`.d.ts`) included out of the box.
 - 🎲 **N-th Order Markov Chains**: Configurable memory depth (order 1 to 5+).
 - 📉 **Katz Back-off Model**: Seamlessly falls back to lower-order models (`order - 1` down to 1) when context runs cold, preventing premature termination.
 - 🧪 **Dirichlet Prior Smoothing**: Additive smoothing parameter to control novelty vs corpus fidelity.
